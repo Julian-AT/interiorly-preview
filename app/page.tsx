@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import Autoplay from "embla-carousel-autoplay";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,21 +23,12 @@ import {
 } from "@/components/ui/form";
 import Image from "next/image";
 import z from "zod";
-import { Card, CardContent } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 type SocketMessage = {
   msg: string;
@@ -53,6 +44,28 @@ type SocketMessage = {
   queue_eta?: number;
   success?: boolean;
 };
+
+const DEFAULT_PROMPT_EMBEDDING = "Interior Design, Home Decor, Architecture";
+
+const DEFAULT_PROMPTS = [
+  "A modern and spacious kitchen with natural light",
+  "An elegant and contemporary bathroom with marble finishes",
+  "A cozy and modern bedroom with minimalist decor",
+  "A luxurious and modern dining room with large windows",
+  "A stylish and elegant home office with sleek furniture",
+  "A contemporary living room with bold art pieces",
+  "A modern balcony with comfortable seating and city views",
+  "A sleek and modern home bar with ambient lighting",
+  "A sophisticated and elegant guest room with fine linens",
+  "A modern and chic media room with state-of-the-art technology",
+  "An elegant and minimalist entryway with clean lines",
+  "A luxurious and contemporary master suite with spa-like bathroom",
+  "A cozy and modern breakfast nook with banquette seating",
+  "A stylish and modern outdoor patio with fire pit",
+  "A contemporary and elegant library with floor-to-ceiling bookshelves",
+  "A minimalist and modern rooftop terrace with panoramic views",
+  "An elegant and modern nursery with soft, neutral tones",
+];
 
 export default function Home() {
   const [message, setMessage] = useState<string>("");
@@ -83,7 +96,6 @@ export default function Home() {
     setProgress(0);
     setIsLoading(true);
     const session_hash = Math.random().toString(36).substring(2);
-    console.log("session_hash", session_hash);
     const ws = new WebSocket(BASEURL);
 
     let etaReached = false;
@@ -101,12 +113,10 @@ export default function Home() {
       }
 
       let timeProgress = (elapsedTime / eta) * 40;
-      console.log(timeProgress + 50);
 
       setProgress(50 + timeProgress);
 
       const randomDelay = Math.random() * (1000 - 500) + 250;
-      console.log(randomDelay);
 
       setTimeout(() => updateProgressBasedOnTime(eta, startTime), randomDelay);
     };
@@ -117,7 +127,6 @@ export default function Home() {
 
     ws.onmessage = (event) => {
       const message: SocketMessage = JSON.parse(event.data);
-      console.log("data", message);
       switch (message.msg) {
         case "send_hash":
           if (retries === 0)
@@ -135,7 +144,7 @@ export default function Home() {
             !message.queue_size ||
             !message.avg_event_process_time
           )
-            return console.log("Invalid message", message);
+            return console.error("Invalid message", message);
 
           if (message.rank > 0) {
             const queueProgress = (1 - message.rank / message.queue_size) * 50;
@@ -149,7 +158,12 @@ export default function Home() {
           );
           ws.send(
             JSON.stringify({
-              data: [prompt, "", 7.5, "Photographic"],
+              data: [
+                prompt + DEFAULT_PROMPT_EMBEDDING,
+                "",
+                7.5,
+                "Photographic",
+              ],
               event_data: null,
               fn_index: 3,
               session_hash,
@@ -158,7 +172,6 @@ export default function Home() {
           break;
         case "process_starts":
           const startTime = Date.now();
-          console.log(estimatedEta);
 
           if (estimatedEta > 0) {
             updateProgressBasedOnTime(estimatedEta, startTime);
@@ -175,7 +188,6 @@ export default function Home() {
           const resultImages = message.output?.data[0] || [];
           setMessage("Your images have been successfully generated!");
           setImages((prev) => [...prev, [...resultImages]]);
-          console.log(images);
           setTimeout(() => setProgress(0), 250);
           break;
         case "queue_full":
@@ -214,7 +226,7 @@ export default function Home() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       prompt:
-        "Elegant living room with a modern touch, beautiful, ultrarealistic, soft lighting, 8k",
+        DEFAULT_PROMPTS[Math.floor(Math.random() * DEFAULT_PROMPTS.length)],
     },
   });
 
@@ -294,7 +306,7 @@ export default function Home() {
                       className="w-full"
                       disabled={isLoading}
                     >
-                      Generate{" "}
+                      Generate&nbsp;
                       {isLoading && (
                         <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                       )}
