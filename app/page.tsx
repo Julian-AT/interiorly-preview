@@ -183,7 +183,7 @@ export default function Home() {
               generateImage(prompt, retries);
             }, 250);
           } else {
-            setMessage("The queue is currently full. Please try again later.");
+            setMessage("The queue is currently full. Please try again.");
           }
           break;
         default:
