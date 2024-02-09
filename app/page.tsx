@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import Autoplay from "embla-carousel-autoplay";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -326,11 +325,6 @@ export default function Home() {
             <div className="container my-5 w-[512px] h-[512px]">
               <Carousel
                 className="w-full h-full"
-                plugins={[
-                  Autoplay({
-                    delay: 5000,
-                  }),
-                ]}
                 setApi={setApi}
               >
                 <CarouselContent>
