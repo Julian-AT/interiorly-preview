@@ -4,7 +4,7 @@ export const siteConfig = {
   description: "Redesign your home with ease.",
   links: {
     instagram: "https://instagram.com/interiorlyai",
-    github: "https://github.com/julian-at/interiorly",
+    github: "https://github.com/julian-at/interiorly-preview",
   },
 };
 
