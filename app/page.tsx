@@ -72,22 +72,8 @@ export default function Home() {
   const [images, setImages] = useState<string[][]>([]);
   const [progress, setProgress] = useState<number>(0);
   const BASEURL = `wss://google-sdxl.hf.space/queue/join`;
-  const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
-
-  React.useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap() + 1);
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1);
-    });
-  }, [api]);
 
   let startTime: null | number = null;
 
@@ -325,7 +311,6 @@ export default function Home() {
             <div className="container my-5 w-[512px] h-[512px]">
               <Carousel
                 className="w-full h-full"
-                setApi={setApi}
               >
                 <CarouselContent>
                   {images[images.length - 1].reverse().map((image, index) => (
@@ -354,7 +339,6 @@ export default function Home() {
                       className={`h-2 w-2 rounded-full ${
                         index + 1 === current ? "bg-primary" : "bg-muted"
                       }`}
-                      onClick={() => api?.scrollTo(index - 1)}
                     />
                   ))}
                 </div>
