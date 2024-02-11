@@ -1,6 +1,3 @@
-// /components/ui/logo.tsx
-// Saturday, September 30th 2023, 12:47 am
-
 import Link from "next/link";
 
 export default function Logo() {
