@@ -17,6 +17,8 @@ import { BetaSignupSchema } from "@/schemas/beta";
 import { useState } from "react";
 import { Icons } from "@/components/icons";
 import { toast } from "sonner";
+import Link from "next/link";
+import { Separator } from "@/components/ui/separator";
 
 export default function BetaSignup() {
   const [isLoading, setIsLoading] = useState(false);
@@ -64,6 +66,21 @@ export default function BetaSignup() {
   return (
     <div className="container py-10 max-w-xl flex flex-col gap-3">
       <div className="space-y-2 text-center">
+        <Link
+          href="/"
+          className="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-sm font-medium"
+        >
+          🏡
+          <Separator
+            className="mx-1 h-4 border-border"
+            orientation="vertical"
+          />
+          <span className="sm:hidden">Interiorly AI Preview </span>
+          <span className="hidden sm:inline">
+            Back to Interiorly AI Preview
+          </span>
+          <Icons.arrowRight className="ml-1 h-4 w-4" />
+        </Link>
         <h1 className="text-3xl font-bold">Join the Beta</h1>
         <p className="text-muted-foreground">
           Enter your information to join the beta. <br /> We&apos;ll notify you

@@ -4,7 +4,7 @@ import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { MobileNav } from "@/components/mobile-menu";
 import { ModeToggle } from "@/components/mode-toggle";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import Logo from "@/components/logo";
 import { Icons } from "@/components/icons";
 
@@ -52,6 +52,12 @@ export default function Header() {
               </div>
             </Link>
             <ModeToggle />
+            <Link
+              href="/beta"
+              className={cn(buttonVariants({ variant: "outline" }))}
+            >
+              Join the Beta
+            </Link>
           </nav>
         </div>
       </div>
