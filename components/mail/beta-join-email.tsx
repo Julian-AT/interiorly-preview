@@ -8,7 +8,6 @@ import {
   Heading,
   Text,
   Link,
-  Image,
 } from "@react-email/components";
 import { siteConfig } from "@/config/site";
 
