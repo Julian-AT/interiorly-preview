@@ -38,13 +38,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // const contact = await resend.contacts.create({
-    //   email,
-    //   firstName,
-    //   lastName,
-    //   unsubscribed: false,
-    //   audienceId: RESEND_BETA_AUDIENCE_ID!,
-    // });
+    const contact = await resend.contacts.create({
+      email,
+      firstName,
+      lastName,
+      unsubscribed: false,
+      audienceId: RESEND_BETA_AUDIENCE_ID!,
+    });
 
     await resend.emails.send({
       from: "Interiorly <onboarding@resend.dev>",
