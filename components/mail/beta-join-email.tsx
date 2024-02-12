@@ -64,7 +64,7 @@ const BetaJoinEmail = ({ firstName }: BetaJoinEmailProps) => {
             <Text className="text-2xl font-bold my-auto">Interiorly AI</Text>
           </Section>
           <Section className="text-center mt-5">
-            <Heading size={3} className="font-bold">
+            <Heading size="3" className="font-bold">
               Welcome to the Beta!
             </Heading>
             <Text>
