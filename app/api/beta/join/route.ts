@@ -3,9 +3,7 @@ import { Resend } from "resend";
 import BetaJoinEmail from "@/components/mail/beta-join-email";
 import { geolocation, ipAddress } from "@vercel/edge";
 
-export const config = {
-  runtime: "edge",
-};
+export const runtime = "edge";
 
 const { RESEND_API_KEY, RESEND_BETA_AUDIENCE_ID } = process.env;
 
