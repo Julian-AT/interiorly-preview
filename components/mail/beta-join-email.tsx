@@ -52,7 +52,7 @@ export const InteriorlyBetaSignUpEmail = ({
             </Heading>
             <Section className="flex justify-center items-center text-center w-full">
               <Img
-                className="rounded-full"
+                className="rounded-full mx-auto"
                 src={userImage}
                 width="64"
                 height="64"
@@ -75,11 +75,11 @@ export const InteriorlyBetaSignUpEmail = ({
               expecting this confirmation message, you can ignore this email.
               <br />
               <br />
-              <span className="flex w-full justify-center text-center">
-                You can use the&nbsp;
-                <span className="text-black">preview version</span>&nbsp;of
-                Interiorly in the meantime
-              </span>
+            </Text>
+            <Text className="flex w-full justify-center text-center">
+              You can use the&nbsp;
+              <span className="text-black">preview version</span>&nbsp;of
+              Interiorly in the meantime
             </Text>
             <Section className="mt-[32px] mb-[32px] justify-center text-center">
               <Button
