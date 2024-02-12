@@ -1,6 +1,11 @@
 import { BetaSignupSchema } from "@/schemas/beta";
 import { Resend } from "resend";
 import BetaJoinEmail from "@/components/mail/beta-join-email";
+import { geolocation, ipAddress } from "@vercel/edge";
+
+export const config = {
+  runtime: "edge",
+};
 
 const { RESEND_API_KEY, RESEND_BETA_AUDIENCE_ID } = process.env;
 
@@ -46,17 +51,26 @@ export async function POST(req: Request) {
       audienceId: RESEND_BETA_AUDIENCE_ID!,
     });
 
+    const { city, country } = geolocation(req);
+    const ip = ipAddress(req) || "Unknown";
+
     await resend.emails.send({
       from: "Interiorly <onboarding@resend.dev>",
       to: email,
       subject: "Welcome to the Beta!",
-      react: BetaJoinEmail({ firstName }),
+      react: BetaJoinEmail({
+        email,
+        firstName,
+        lastName,
+        ip,
+        geolocation: city && country ? `${city}, ${country}` : "Unknown",
+      }),
     });
 
     return new Response(
       JSON.stringify({
         message: "Successfully signed up for the beta.",
-        // id: contact.data?.id,
+        id: contact.data?.id,
         success: true,
       }),
       {
