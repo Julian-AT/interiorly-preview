@@ -7,6 +7,8 @@ export const runtime = "edge";
 
 const { RESEND_API_KEY, RESEND_BETA_AUDIENCE_ID } = process.env;
 
+let regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+
 const resend = new Resend(RESEND_API_KEY!);
 
 export async function POST(req: Request) {
@@ -50,6 +52,7 @@ export async function POST(req: Request) {
     });
 
     const { city, country } = geolocation(req);
+    const region = country ? regionNames.of(country) : "Unknown";
     const ip = ipAddress(req) || "Unknown";
 
     await resend.emails.send({
@@ -61,7 +64,7 @@ export async function POST(req: Request) {
         firstName,
         lastName,
         ip,
-        geolocation: city && country ? `${city}, ${country}` : "Unknown",
+        geolocation: city && country ? `${city}, ${region}` : "Unknown",
       }),
     });
 
