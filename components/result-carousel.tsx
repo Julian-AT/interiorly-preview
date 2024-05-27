@@ -1,6 +1,5 @@
 "use client";
 
-import { CircularProgress } from "@nextui-org/progress";
 import Image from "next/image";
 import { Progress } from "./progress";
 import { Card } from "./ui/card";
@@ -12,14 +11,15 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "./ui/carousel";
-import { Icons } from "./icons";
+import { Icons } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useImageGeneration } from "@/lib/hooks/use-images";
 import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ResultCarousel() {
-  const { images, progress, message } = useImageGeneration();
+  const { images, progress, message, isPending } = useImageGeneration();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
@@ -42,7 +42,14 @@ export default function ResultCarousel() {
         images.length > 0 && progress === 0 && "shadow-none border-none"
       )}
     >
-      {progress === 0 ? (
+      {isPending ? (
+        <Skeleton className="w-full h-full flex flex-col items-center justify-center gap-5">
+          <Icons.spinner className="w-16 h-16 animate-spin" />
+          <span className="text-secondary-foreground text-xl font-semibold">
+            Loading Images
+          </span>
+        </Skeleton>
+      ) : progress === 0 ? (
         images.length === 0 ? (
           <div className="text-center w-full flex flex-col gap-3">
             <Icons.media className="m-auto w-20 h-20" />

@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DEFAULT_PROMPTS } from "@/config/generation";
 import { Icons } from "@/components/icons";
 import { useImageGeneration } from "@/lib/hooks/use-images";
+import { ClientJS } from "clientjs";
 import {
   Tooltip,
   TooltipContent,
@@ -18,7 +19,7 @@ import { useEnterSubmit } from "@/lib/hooks/use-enter-submit";
 import { cn } from "@/lib/utils";
 
 export function GenerationForm() {
-  const { generateImage, isLoading } = useImageGeneration();
+  const { generateImage, isLoading, isPending } = useImageGeneration();
   const { formRef, onKeyDown } = useEnterSubmit();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -71,8 +72,13 @@ export function GenerationForm() {
     }
   }, []);
 
-  const onSubmit = (data: z.infer<typeof formSchema>) =>
+  const client = new ClientJS();
+
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    const fingerprint = client.getFingerprint();
+    console.log(fingerprint);
     generateImage(data.prompt);
+  };
 
   return (
     <div className="max-w-xl w-full mx-auto px-3">
@@ -111,14 +117,18 @@ export function GenerationForm() {
         {errors.prompt && (
           <span className="text-red-600 text-sm">{errors.prompt.message}</span>
         )}
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isLoading || isPending}
+        >
           {isLoading ? (
             <span className="flex items-baseline">
               Generating...&nbsp;
               <Icons.spinner className="mr-2 animate-spin w-full h-4 m-auto" />
             </span>
           ) : (
-            <span>Generate</span>
+            <span className="text-primary-foreground">Generate</span>
           )}
         </Button>
       </form>

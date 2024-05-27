@@ -4,7 +4,7 @@ export const MAX_RETRIES = 10;
 
 export const RETRY_TIMEOUT = 500;
 
-export const PROCESS_COMPLETION_PROGRESS_TIMEOUT = 333;
+export const PROCESS_COMPLETION_PROGRESS_TIMEOUT = 1000;
 
 export const DEFAULT_MESSAGE = "Waiting for image generation to start...";
 

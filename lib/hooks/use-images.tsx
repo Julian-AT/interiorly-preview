@@ -1,11 +1,13 @@
+"use client";
+
 import React, {
   createContext,
   useContext,
   useCallback,
   useState,
   useRef,
+  useEffect,
 } from "react";
-import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import {
   BASEURL,
   DEFAULT_MESSAGE,
@@ -14,12 +16,19 @@ import {
   PROCESS_COMPLETION_PROGRESS_TIMEOUT,
   RETRY_TIMEOUT,
 } from "@/config/generation";
+import { ClientJS } from "clientjs";
+import {
+  clearImageBatches,
+  getImageBatchesByFingerprint,
+  saveImageBatch,
+} from "@/app/actions/db";
 
 interface ImageGenerationContextType {
   images: ImageBatch[];
   message: string;
   progress: number;
   isLoading: boolean;
+  isPending: boolean;
   generateImage: (prompt: string) => void;
   addImageBatch: (prompt: string, newImageArray: string[]) => void;
   clearImages: () => void;
@@ -30,16 +39,18 @@ const ImageGenerationContext = createContext<ImageGenerationContextType>({
   message: DEFAULT_MESSAGE,
   progress: 0,
   isLoading: false,
+  isPending: false,
   generateImage: () => {},
-  addImageBatch: () => {},
+  addImageBatch: async () => ({} as ImageBatch),
   clearImages: () => {},
 });
 
 export const ImageGenerationProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const [images, setImages] = useLocalStorage<ImageBatch[]>("images", []);
+  const [images, setImages] = useState<ImageBatch[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isPending, setIsPending] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [message, setMessage] = useState<string>(DEFAULT_MESSAGE);
   const retriesRef = useRef<number>(0);
@@ -48,24 +59,59 @@ export const ImageGenerationProvider: React.FC<{
   const estimatedEtaRef = useRef<number>(0);
   const wsRef = useRef<WebSocket | null>(null);
 
+  const client = new ClientJS();
+
+  const getImages = useCallback(async () => {
+    const images = getImageBatchesByFingerprint(client.getFingerprint());
+    return ((await images).data || []) as ImageBatch[];
+  }, [getImageBatchesByFingerprint]);
+
+  const fetchImages = useCallback(async () => {
+    setIsPending(true);
+    const images = await getImages();
+    setIsPending(false);
+    setImages(images);
+  }, [getImages]);
+
+  useEffect(() => {
+    fetchImages();
+  }, [fetchImages]);
+
   const addImageBatch = useCallback(
-    (prompt: string, newImageArray: string[]) => {
+    async (prompt: string, newImageArray: string[]) => {
+      const fingerprint = client.getFingerprint();
+
       const newBatch: ImageBatch = {
+        fingerprint,
         prompt,
         timestamp: Date.now(),
         batch: newImageArray,
       };
-      setImages((prevBatches) => [
-        newBatch,
-        ...(prevBatches || []).slice(0, 4),
-      ]);
+
+      const res = await saveImageBatch(newBatch);
+      setImages((prevImages) =>
+        [...prevImages, newBatch].sort((i1, i2) => i2.timestamp - i1.timestamp)
+      );
+      if (res.success) {
+        console.log("Image batch saved successfully.");
+      } else {
+        console.error("Error saving image batch: " + res.message);
+        console.log(res);
+      }
     },
-    [setImages]
+    [saveImageBatch]
   );
 
-  const clearImages = useCallback(() => {
+  const clearImages = useCallback(async () => {
+    const tmpImags = images;
     setImages([]);
-  }, [setImages]);
+    try {
+      await clearImageBatches(client.getFingerprint());
+    } catch (e) {
+      console.error(e);
+      setImages(tmpImags);
+    }
+  }, [clearImageBatches]);
 
   const generateImage = useCallback(
     (prompt: string) => {
@@ -130,10 +176,12 @@ export const ImageGenerationProvider: React.FC<{
                 `Queue Position ${data.rank}/${initalQueueSizeRef.current}`
               );
             } else {
+              if (progress > 0) setProgress(progress + 7.5);
               console.error("Invalid Estimation received. " + data);
             }
             break;
           case "process_starts":
+            setProgress(50);
             setMessage("Generating Images...");
             updateProgressBasedOnEstimation(Date.now());
             break;
@@ -165,7 +213,7 @@ export const ImageGenerationProvider: React.FC<{
       };
 
       const handleError = () => {
-        retryOrAbort("WebSocket error. Retrying...");
+        retryOrAbort("WebSocket error. Are you connected to the internet?");
       };
 
       const retryOrAbort = (message: string) => {
@@ -217,10 +265,11 @@ export const ImageGenerationProvider: React.FC<{
   return (
     <ImageGenerationContext.Provider
       value={{
-        images: images || [],
+        images,
         progress,
         message,
         isLoading,
+        isPending,
         generateImage,
         addImageBatch,
         clearImages,

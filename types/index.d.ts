@@ -11,6 +11,7 @@ type SocketMessage = {
 };
 
 interface ImageBatch {
+  fingerprint: number;
   prompt: string;
   timestamp: number;
   batch: string[];
